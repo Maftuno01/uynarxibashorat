@@ -4,7 +4,7 @@ import numpy as np
 import joblib
 
 # Modelni yuklash
-model_filename = 'uynarxi.pkl'
+model_filename = 'uynarxi_randomforest.pkl'
 model = joblib.load(model_filename)
 
 # Sahifa sozlamalari
