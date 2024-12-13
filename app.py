@@ -61,7 +61,7 @@ if st.button("Narxni bashorat qilish"):
     user_df = pd.get_dummies(user_df, drop_first=True)
 
     # Modellashda ishlatilgan ustunlarni tekshirish va to'ldirish
-    model_columns = pd.get_dummies(data.drop(columns=['narx']), drop_first=True).columns
+    model_columns = pd.get_dummies(data.drop(columns=['price']), drop_first=True).columns
     for col in model_columns:
         if col not in user_df.columns:
             user_df[col] = 0
