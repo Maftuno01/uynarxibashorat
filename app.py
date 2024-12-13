@@ -28,7 +28,7 @@ price_ranges = {
 }
 
 # Ma'lumotlarni yuklash va unique qiymatlarni olish
-file_path = 'uybor.csv'
+file_path = 'uynarxi.csv'
 data = pd.read_csv(file_path)
 districts = data['district'].unique()
 
