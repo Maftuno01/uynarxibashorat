@@ -1,6 +1,7 @@
 import streamlit as st
-import pandas as np
+import pandas as pd
 import joblib
+
 
 # Modelni yuklash
 model_filename = 'uynarxi_randomforest.pkl'
