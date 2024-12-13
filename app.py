@@ -1,31 +1,90 @@
 import streamlit as st
-import joblib
+import pandas as pd
 import numpy as np
-#uzgarish
+import joblib
+
 # Modelni yuklash
-model = joblib.load('housemodel.pkl')
+model_filename = 'uynarxi.pkl'
+model = joblib.load(model_filename)
 
-# Streamlit interfeysi
-st.title("Uy Narxini Bashorat Qilish")
+# Sahifa sozlamalari
+st.title("Uy narxini bashorat qilish")
+st.write("Iltimos, uy haqidagi ma'lumotlarni kiriting va narxini bashorat qiling.")
 
-# Foydalanuvchidan ma'lumotlarni olish
-length = st.slider("G'arbga uzoqlik (km)", 0, 100, 50)
-width = st.slider("Shimolga uzoqlik (km)", 0, 100, 50)
-median_age = st.slider("O'rtacha uy yoshi (yil)", 0, 50, 25)
-total_rooms = st.slider("Xonalar soni", 1, 10, 5)
-total_bedrooms = st.slider("Yotoq xonalarining soni", 1, 5, 3)
-population = st.slider("Aholi soni", 50, 1000, 500)
+# Ma'lumotlarni yuklash va unique qiymatlarni olish
+file_path = 'uynarxi.csv'
+data = pd.read_csv(file_path)
+districts = data['district'].unique()
+
+# Foydalanuvchi kirishlari
+selected_district = st.selectbox("Tumanni tanlang", districts)
+rooms = st.number_input("Xonalar soni", min_value=1, step=1)
+size = st.number_input("Maydoni (m²)", min_value=1.0, step=1.0)
+level = st.number_input("Qavat raqami", min_value=1, step=1)
+max_levels = st.number_input("Umumiy qavatlar soni", min_value=1, step=1)
 
 # Bashorat qilish tugmasi
-if st.button("Narxni Bashorat Qiling"):
-    # Foydalanuvchi parametrlari asosida modelni ishga tushurish
-    input_data = np.array([[length, width, median_age, total_rooms, total_bedrooms, population]])
+if st.button("Narxni bashorat qilish"):
+    # Foydalanuvchi kiritgan ma'lumotlardan massiv yaratish
+    user_data = {
+        'district': [selected_district],
+        'rooms': [rooms],
+        'size': [size],
+        'level': [level],
+        'max_levels': [max_levels]
+    }
+
+    # DataFrame yaratish
+    user_df = pd.DataFrame(user_data)
+
+    # Kategorik ustunni kodlash
+    user_df = pd.get_dummies(user_df, drop_first=True)
+
+    # Modellashda ishlatilgan ustunlarni tekshirish va to'ldirish
+    model_columns = pd.get_dummies(data.drop(columns=['price']), drop_first=True).columns
+    for col in model_columns:
+        if col not in user_df.columns:
+            user_df[col] = 0
+
+    # Ustunlarning tartibini moslashtirish
+    user_df = user_df[model_columns]
+
+    # Bashorat qilish
+    prediction = model.predict(user_df)[0]
+
+    # Natijani chiqarish
+    st.write(f"Bashorat qilingan uy narxi: {prediction:.2f}")
+
+
+
+# import streamlit as st
+# import joblib
+# import numpy as np
+# #uzgarish
+# # Modelni yuklash
+# model = joblib.load('housemodel.pkl')
+
+# # Streamlit interfeysi
+# st.title("Uy Narxini Bashorat Qilish")
+
+# # Foydalanuvchidan ma'lumotlarni olish
+# length = st.slider("G'arbga uzoqlik (km)", 0, 100, 50)
+# width = st.slider("Shimolga uzoqlik (km)", 0, 100, 50)
+# median_age = st.slider("O'rtacha uy yoshi (yil)", 0, 50, 25)
+# total_rooms = st.slider("Xonalar soni", 1, 10, 5)
+# total_bedrooms = st.slider("Yotoq xonalarining soni", 1, 5, 3)
+# population = st.slider("Aholi soni", 50, 1000, 500)
+
+# # Bashorat qilish tugmasi
+# if st.button("Narxni Bashorat Qiling"):
+#     # Foydalanuvchi parametrlari asosida modelni ishga tushurish
+#     input_data = np.array([[length, width, median_age, total_rooms, total_bedrooms, population]])
     
-    # Model yordamida narxni bashorat qilish
-    predicted_price = model.predict(input_data)
+#     # Model yordamida narxni bashorat qilish
+#     predicted_price = model.predict(input_data)
     
-    # Bashoratni foydalanuvchiga ko'rsatish
-    st.success(f"Bashorat qilingan uy narxi: {predicted_price[0]:,.2f} dollar")
+#     # Bashoratni foydalanuvchiga ko'rsatish
+#     st.success(f"Bashorat qilingan uy narxi: {predicted_price[0]:,.2f} dollar")
 
 
 
